@@ -37,9 +37,37 @@ namespace BigSchool.Controllers
             context.Course.Add(objcourse);
             context.SaveChanges();
             return RedirectToAction("Index", "Home");
+            
         }
         BigSchoolContext context = new BigSchoolContext();
         // Không xét valid LectureId vì bằng user đăng nhập
-       
+        public ActionResult Attending()
+        {
+            BigSchoolContext context = new BigSchoolContext();
+            ApplicationUser currentUser = System.Web.HttpContext.Current.GetOwinContext().GetUserManager<ApplicationUserManager>().FindById(System.Web.HttpContext.Current.User.Identity.GetUserId());
+            var listAttendances = context.Attendance.Where(p=>p.Attendee==currentUser.Id).ToList();
+            var courses = new List<Course>();
+            foreach(Attendance temp in listAttendances)
+            {
+                Course objCourse = temp.Course;
+                objCourse.LecturedName = System.Web.HttpContext.Current.GetOwinContext().GetUserManager<ApplicationUserManager>()
+                    .FindById(objCourse.LecturedId).Name;
+                courses.Add(objCourse);
+
+            }
+            return View(courses);
+        }
+        public ActionResult Mine()
+        {
+            BigSchoolContext con = new BigSchoolContext();
+            ApplicationUser currentUser = System.Web.HttpContext.Current.GetOwinContext().GetUserManager<ApplicationUserManager>().FindById(System.Web.HttpContext.Current.User.Identity.GetUserId());
+            var courses = con.Course.Where(c => c.LecturedId == currentUser.Id && c.DateTime > DateTime.Now).ToList();
+
+            foreach (Course i in courses)
+            {
+                i.LecturedName = currentUser.Name;
+            }
+            return View(courses);
+        }
     }
 }
