@@ -3,6 +3,7 @@ using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.Owin;
 using System;
 using System.Collections.Generic;
+using System.Data.Entity.Migrations;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
@@ -68,6 +69,58 @@ namespace BigSchool.Controllers
                 i.LecturedName = currentUser.Name;
             }
             return View(courses);
+        }
+        public ActionResult Edit(int? id)
+        {
+            Course course = context.Course.Find(id);
+            course.listCategory = context.Category.ToList();
+            if (id == null)
+            {
+                return HttpNotFound();
+            }
+            if (course == null)
+            {
+                return HttpNotFound();
+            }
+            return View(course);
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Edit(Course objcourse)
+        {
+            ModelState.Remove("LecturedId");
+            if (!ModelState.IsValid)
+            {
+                objcourse.listCategory = context.Category.ToList();
+                return View("Edit", objcourse);
+            }
+            
+            ApplicationUser user = System.Web.HttpContext.Current.GetOwinContext().GetUserManager<ApplicationUserManager>().FindById(System.Web.HttpContext.Current.User.Identity.GetUserId());
+            objcourse.LecturedId = user.Id;
+
+            context.Course.AddOrUpdate(objcourse);
+            context.SaveChanges();
+
+            return RedirectToAction("Mine", "Courses");
+        }
+        public ActionResult Delete(int? id)
+        {
+            Course course = context.Course.Find(id);
+            course.listCategory = context.Category.ToList();
+            return View (course);
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Delete(int id)
+        {
+            ApplicationUser currentUser = System.Web.HttpContext.Current.GetOwinContext().GetUserManager<ApplicationUserManager>().FindById(System.Web.HttpContext.Current.User.Identity.GetUserId());
+            Course course = context.Course.Find(id);
+            Attendance attendance = context.Attendance.Find(id, currentUser.Id);
+            context.Attendance.Remove(attendance);
+            context.SaveChanges();
+            context.Course.Remove(course);
+            context.SaveChanges();
+            return RedirectToAction("Mine", "Courses");
         }
     }
 }
