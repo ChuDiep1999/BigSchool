@@ -8,13 +8,14 @@ namespace BigSchool.Models
     public partial class BigSchoolContext : DbContext
     {
         public BigSchoolContext()
-            : base("name=BigSchoolContext2")
+            : base("name=BigSchoolContext3")
         {
         }
 
         public virtual DbSet<Attendance> Attendance { get; set; }
         public virtual DbSet<Category> Category { get; set; }
         public virtual DbSet<Course> Course { get; set; }
+        public virtual DbSet<Following> Following { get; set; }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {

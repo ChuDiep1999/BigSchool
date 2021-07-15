@@ -122,5 +122,35 @@ namespace BigSchool.Controllers
             context.SaveChanges();
             return RedirectToAction("Mine", "Courses");
         }
+        public ActionResult LectureIamGoing()
+        {
+            ApplicationUser currentUser =
+           System.Web.HttpContext.Current.GetOwinContext().GetUserManager<ApplicationUserManager>()
+            .FindById(System.Web.HttpContext.Current.User.Identity.GetUserId());
+            BigSchoolContext context = new BigSchoolContext();
+            //danh sách giảng viên được theo dõi bởi người dùng (đăng nhập) hiện tại
+            var listFollwee = context.Following.Where(p => p.FollowerId ==
+            currentUser.Id).ToList();
+            //danh sách các khóa học mà người dùng đã đăng ký
+            var listAttendances = context.Attendance.Where(p => p.Attendee ==
+            currentUser.Id).ToList();
+            var courses = new List<Course>();
+            foreach (var course in listAttendances)
+            {
+                foreach (var item in listFollwee)
+                {
+                    if (item.FolloweeId == course.Course.LecturedId)
+                    {
+                        Course objCourse = course.Course;
+                        objCourse.LecturedName =
+                       System.Web.HttpContext.Current.GetOwinContext().GetUserManager<ApplicationUserManager>()
+                        .FindById(objCourse.LecturedId).Name;
+                        courses.Add(objCourse);
+                    }
+                }
+
+            }
+            return View(courses);
+        }
     }
 }

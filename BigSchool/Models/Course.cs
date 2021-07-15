@@ -16,6 +16,9 @@ namespace BigSchool.Models
         }
 
         public int Id { get; set; }
+        public bool isLogin = false;
+        public bool isShowFollow = false;
+        public bool isShowGoing = false;
         public string Name;
         [Required]
         [StringLength(128)]
